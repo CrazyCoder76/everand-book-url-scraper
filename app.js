@@ -13,6 +13,7 @@ var DATABASE_NAME = 'bookUrlList';
 
 var request_count = 100;
 var request_index = 0;
+var interval = null;
 
 mongoose.connect('mongodb://' + HOST_NAME + '/' + DATABASE_NAME);
 
@@ -53,12 +54,14 @@ async function sendRequests() {
   request_index ++;
   for(let i = startId; i <= endId; i++)
     await sendRequest(i, "Computers");
+  if(request_index > 10000) 
+    clearInterval(interval);
 }
 
 mongoose.connection.once('open', function () {
   console.log('Connected to MongoDB');
 
-  setInterval(sendRequests, 1000);
+  interval = setInterval(sendRequests, 2000);
 });
 
 
