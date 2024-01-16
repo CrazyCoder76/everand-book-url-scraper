@@ -11,6 +11,9 @@ var PORT = 8080;
 var HOST_NAME = '127.0.0.1';
 var DATABASE_NAME = 'bookUrlList';
 
+var request_count = 100;
+var request_index = 0;
+
 mongoose.connect('mongodb://' + HOST_NAME + '/' + DATABASE_NAME);
 
 app.use(bodyParser.json());
@@ -23,11 +26,9 @@ app.listen(PORT, function () {
 });
 
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
-mongoose.connection.once('open', function () {
-  console.log('Connected to MongoDB');
 
-  for(let i = 1; i <= 2; i++) {
-    axios.get(`https://www.everand.com/books/Computers/explore-more?page=${i}`)
+async function sendRequest(pageId, category) {
+  axios.get(`https://www.everand.com/books/${category}/explore-more?page=${pageId}`)
       .then(response => {
         const data = response.data;
         for(let key in data.documents) {
@@ -45,7 +46,19 @@ mongoose.connection.once('open', function () {
       .catch(error => {
         console.log(error);
       })
-  }
+}
+async function sendRequests() {
+  let startId = request_index * request_count + 1;
+  let endId = (request_index+1) * request_count;
+  request_index ++;
+  for(let i = startId; i <= endId; i++)
+    await sendRequest(i, "Computers");
+}
+
+mongoose.connection.once('open', function () {
+  console.log('Connected to MongoDB');
+
+  setInterval(sendRequests, 1000);
 });
 
 
