@@ -11,8 +11,6 @@ var PORT = 8080;
 var HOST_NAME = '127.0.0.1';
 var DATABASE_NAME = 'bookUrlList';
 
-var maxPages = 200000;
-
 mongoose.connect('mongodb://' + HOST_NAME + '/' + DATABASE_NAME);
 
 app.use(bodyParser.json());
@@ -33,10 +31,9 @@ async function sendRequest(pageId, category) {
         var cnt = 0;
         
         console.log(`${pageId}/${data.page_count}`);
-        const documents = data.results.books.documents;
-        for(let key in documents) {
-          console.log(key);
-          let book_instance = new bookSchema({title: key.title, url: key.book_preview_url});
+        const books = data.results.books.content.documents;
+        books.map((book) => {
+          let book_instance = new bookSchema({title: book.title, url: book.book_preview_url});
 
           book_instance.save()
             .then(res => {
@@ -46,7 +43,7 @@ async function sendRequest(pageId, category) {
               console.log(error);
             });
           cnt++;
-        }
+        });
         console.log(cnt);
         if(pageId < data.page_count)
           sendRequest(pageId+1, category);
@@ -61,5 +58,3 @@ mongoose.connection.once('open', function () {
 
   sendRequest(1, "Computers");
 });
-
-
