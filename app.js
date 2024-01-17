@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var axios = require('axios');
+var proxies = require('./proxy');
 
 var bookSchema = require('./models/item');
 
@@ -10,6 +11,7 @@ var app = express();
 var PORT = 8080;
 var HOST_NAME = '127.0.0.1';
 var DATABASE_NAME = 'bookUrlList';
+var WAITING_TIME = 300000;
 
 mongoose.connect('mongodb://' + HOST_NAME + '/' + DATABASE_NAME);
 
@@ -24,12 +26,17 @@ app.listen(PORT, function () {
 
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
+function get_random_proxy(proxies) {
+  return proxies[Math.floor((Math.random() * proxies.length))];
+}
+
 async function sendRequest(pageId, query) {
-  axios.get(`https://www.everand.com//search/query?query=${String.fromCharCode(97 + query)}&content_type=books&page=${pageId}`)
+
+  axios.get(`https://www.everand.com//search/query?query=${String.fromCharCode(97 + query)}&content_type=books&page=${pageId}`, {proxy: get_random_proxy(proxies) })
       .then(response => {
         const data = response.data;
         
-        console.log(`${pageId}/${data.page_count} - ${String.fromCharCode(97 + query)}`);
+        console.log(`${pageId}/${data.page_count} - ${String.fromCharCode(97 + query)}  : ${WAITING_TIME / 1000}s`);
         const books = data.results.books.content.documents;
         books.map((book) => {
           let book_instance = new bookSchema({title: book.title, url: book.book_preview_url});
@@ -38,10 +45,9 @@ async function sendRequest(pageId, query) {
             if(books.length == 0) {
               book_instance.save()
               .then(res => {
-                console.log(res.title);
               })
               .catch(error => {
-                console.log(error);
+                console.log("saving database error");
               });
             }
           });
@@ -52,14 +58,14 @@ async function sendRequest(pageId, query) {
           sendRequest(pageId+1, query);
       })
       .catch(error => {
-        console.log(error);
+        console.log(`sending request error :${WAITING_TIME / 1000}s`);
+        setTimeout(() => { sendRequest(pageId, query); }, WAITING_TIME);
       })
 }
 
 mongoose.connection.once('open', function () {
   console.log('Connected to MongoDB');
-
-  for(var i = 0; i <= 26; i++) {
+  
+  for(var i = 0; i < 26; i++)
     sendRequest(1, i);
-  }
 });
