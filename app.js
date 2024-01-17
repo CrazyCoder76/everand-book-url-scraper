@@ -11,7 +11,7 @@ var PORT = 8080;
 var HOST_NAME = '127.0.0.1';
 var DATABASE_NAME = 'bookUrlList';
 
-var maxPages = 5;
+var maxPages = 200000;
 
 mongoose.connect('mongodb://' + HOST_NAME + '/' + DATABASE_NAME);
 
@@ -27,13 +27,16 @@ app.listen(PORT, function () {
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
 async function sendRequest(pageId, category) {
-  console.log(pageId);
-  axios.get(`https://www.everand.com/books/${category}/explore-more?page=${pageId}`)
+  axios.get(`https://www.everand.com//search/query?query=a&content_type=books&page=${pageId}`)
       .then(response => {
         const data = response.data;
         var cnt = 0;
-        for(let key in data.documents) {
-          let book_instance = new bookSchema({title: data.documents[key].title, url: data.documents[key].previewUrl});
+        
+        console.log(`${pageId}/${data.page_count}`);
+        const documents = data.results.books.documents;
+        for(let key in documents) {
+          console.log(key);
+          let book_instance = new bookSchema({title: key.title, url: key.book_preview_url});
 
           book_instance.save()
             .then(res => {
@@ -45,7 +48,7 @@ async function sendRequest(pageId, category) {
           cnt++;
         }
         console.log(cnt);
-        if(pageId < maxPages)
+        if(pageId < data.page_count)
           sendRequest(pageId+1, category);
       })
       .catch(error => {
