@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var axios = require('axios');
+
 var proxies = require('./proxy');
 
 var bookSchema = require('./models/item');
@@ -26,17 +27,14 @@ app.listen(PORT, function () {
 
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
-function get_random_proxy(proxies) {
-  return proxies[Math.floor((Math.random() * proxies.length))];
-}
-
 async function sendRequest(pageId, query) {
+  const proxy_id = Math.floor((Math.random() * proxies.length));
 
-  axios.get(`https://www.everand.com//search/query?query=${String.fromCharCode(97 + query)}&content_type=books&page=${pageId}`, {proxy: get_random_proxy(proxies) })
+  axios.get(`https://www.everand.com//search/query?query=${String.fromCharCode(97 + query)}&content_type=books&page=${pageId}`, {proxy: proxies[proxy_id] })
       .then(response => {
         const data = response.data;
         
-        console.log(`${pageId}/${data.page_count} - ${String.fromCharCode(97 + query)}  : ${WAITING_TIME / 1000}s`);
+        console.log(`${pageId}/${data.page_count} - ${String.fromCharCode(97 + query)} (${proxy_id}) : ${WAITING_TIME / 1000}s`);
         const books = data.results.books.content.documents;
         books.map((book) => {
           let book_instance = new bookSchema({title: book.title, url: book.book_preview_url});
@@ -65,7 +63,7 @@ async function sendRequest(pageId, query) {
 
 mongoose.connection.once('open', function () {
   console.log('Connected to MongoDB');
-  
+
   for(var i = 0; i < 26; i++)
-    sendRequest(1, i);
+    sendRequest(1, 0);
 });

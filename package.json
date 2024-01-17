@@ -21,6 +21,7 @@
     "axios": "^1.6.5",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
-    "mongoose": "^8.0.4"
+    "mongoose": "^8.0.4",
+    "node-uuid": "^1.4.8"
   }
 }
