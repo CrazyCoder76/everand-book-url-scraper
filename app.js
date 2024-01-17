@@ -24,29 +24,32 @@ app.listen(PORT, function () {
 
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
-async function sendRequest(pageId, category) {
-  axios.get(`https://www.everand.com//search/query?query=a&content_type=books&page=${pageId}`)
+async function sendRequest(pageId, query) {
+  axios.get(`https://www.everand.com//search/query?query=${String.fromCharCode(97 + query)}&content_type=books&page=${pageId}`)
       .then(response => {
         const data = response.data;
-        var cnt = 0;
         
-        console.log(`${pageId}/${data.page_count}`);
+        console.log(`${pageId}/${data.page_count} - ${String.fromCharCode(97 + query)}`);
         const books = data.results.books.content.documents;
         books.map((book) => {
           let book_instance = new bookSchema({title: book.title, url: book.book_preview_url});
+          
+          bookSchema.find({ title: book.title }).then(books => {
+            if(books.length == 0) {
+              book_instance.save()
+              .then(res => {
+                console.log(res.title);
+              })
+              .catch(error => {
+                console.log(error);
+              });
+            }
+          });
 
-          book_instance.save()
-            .then(res => {
-              console.log(res.title);
-            })
-            .catch(error => {
-              console.log(error);
-            });
-          cnt++;
         });
-        console.log(cnt);
+
         if(pageId < data.page_count)
-          sendRequest(pageId+1, category);
+          sendRequest(pageId+1, query);
       })
       .catch(error => {
         console.log(error);
@@ -56,5 +59,7 @@ async function sendRequest(pageId, category) {
 mongoose.connection.once('open', function () {
   console.log('Connected to MongoDB');
 
-  sendRequest(1, "Computers");
+  for(var i = 0; i <= 26; i++) {
+    sendRequest(1, i);
+  }
 });
