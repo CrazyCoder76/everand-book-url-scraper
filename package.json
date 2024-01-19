@@ -21,7 +21,9 @@
     "axios": "^1.6.5",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
+    "lodash": "^4.17.21",
     "mongoose": "^8.0.4",
+    "most-common-words-by-language": "^3.0.13",
     "node-uuid": "^1.4.8"
   }
 }

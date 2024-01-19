@@ -2,9 +2,10 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var axios = require('axios');
+const { getWordsList } = require('most-common-words-by-language');
 
 var proxies = require('./proxy');
-
+var lang = require('./language');
 var bookSchema = require('./models/item');
 
 var app = express();
@@ -27,32 +28,27 @@ app.listen(PORT, function () {
 
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
-async function sendRequest(pageId, query) {
+async function sendRequest(pageId, query, language) {
   const proxy_id = Math.floor((Math.random() * proxies.length));
-
-  axios.get(`https://www.everand.com//search/query?query=${String.fromCharCode(97 + query)}&content_type=books&page=${pageId}`, {proxy: proxies[proxy_id] })
+  const memoryUsage = process.memoryUsage();
+  
+  axios.get(`https://www.everand.com//search/query?query=${query}&content_type=books&page=${pageId}`, {proxy: proxies[proxy_id] })
       .then(response => {
         const data = response.data;
         
-        console.log(`${pageId}/${data.page_count} - ${String.fromCharCode(97 + query)} (${proxy_id}) : ${WAITING_TIME / 1000}s`);
+        console.log(`${pageId}/${data.page_count} - ${query} (${proxy_id}) : ${WAITING_TIME / 1000}s  Heap Used: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`);
         const books = data.results.books.content.documents;
         books.map((book) => {
-          let book_instance = new bookSchema({title: book.title, url: book.book_preview_url});
-          
-          bookSchema.find({ title: book.title }).then(books => {
-            if(books.length == 0) {
-              book_instance.save()
-              .then(res => {
-              })
-              .catch(error => {
-                console.log("saving database error");
-              });
+          try {
+            bookSchema.create({title: book.title, url: book.book_preview_url, language: language, search: query});
+          } catch (error) {
+            if(error.code != 11000) {
+              console.log("saving database error");
             }
-          });
-
+          }
         });
 
-        if(pageId < data.page_count)
+        if(pageId < data.page_count && pageId <= 235)
           sendRequest(pageId+1, query);
       })
       .catch(error => {
@@ -61,9 +57,17 @@ async function sendRequest(pageId, query) {
       })
 }
 
+async function SearchBooks(language) {
+  const words = getWordsList(language, 3000);
+  for(var i = 0; i < words.length; i++) {
+    await sendRequest(1, words[i], language);
+  }
+}
+
 mongoose.connection.once('open', function () {
   console.log('Connected to MongoDB');
 
-  for(var i = 0; i < 26; i++)
-    sendRequest(1, 0);
+  lang.map(language => {
+    SearchBooks(language);
+  });
 });

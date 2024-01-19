@@ -10,11 +10,18 @@ var bookSchema = new Schema({
   },
   title: {
     type: String,
+    unique: true,
     required: true
   },
   url: {
     type: String,
     required: true
+  },
+  language: {
+    type: String
+  },
+  search: {
+    type: String
   }
 });
 
