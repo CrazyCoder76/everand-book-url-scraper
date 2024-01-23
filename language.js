@@ -8,7 +8,17 @@ const lang = [
     "spanish",
     "french",
     "chinese",
-    "arabic"
+    "arabic",
+    "afrikaans",
+    "turkish",
+    "swedish",
+    "polish",
+    "indonesian",
+    "italian",
+    "greek",
+    "danish",
+    "dutch",
+    "catalan"
 ];
 
 module.exports = lang;

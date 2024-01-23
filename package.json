@@ -24,6 +24,7 @@
     "lodash": "^4.17.21",
     "mongoose": "^8.0.4",
     "most-common-words-by-language": "^3.0.13",
-    "node-uuid": "^1.4.8"
+    "node-uuid": "^1.4.8",
+    "request-promise": "^4.2.6"
   }
 }
