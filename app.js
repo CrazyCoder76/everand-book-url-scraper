@@ -40,7 +40,7 @@ async function sendRequest(pageId, query, langId) {
   const language = lang[langId];
   const memoryUsage = process.memoryUsage();
 
-  if(Math.round(memoryUsage.heapUsed / 1024 / 1024 / 1024) >= 7) {
+  if(Math.round(memoryUsage.heapUsed / 1024 / 1024 / 1024) >= 8) {
     console.log('Heap memory exceed!!!');
     setTimeout(() => {
       sendRequest(pageId, query, langId);
@@ -93,7 +93,7 @@ async function sendRequest(pageId, query, langId) {
 // }
 
 async function SearchBooks_Word(ind) {
-  sendRequest(1, ind, 0);
+  sendRequest(1, ind, 12);
 }
 
 mongoose.connection.once('open', function () {
