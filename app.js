@@ -113,10 +113,10 @@ async function sendEnglishRequest(pageId, query, cnt) {
     if(data === undefined)
       return;
 
-    console.log(`${pageId}/${data.page_count} - ${queryParam} (${language} : ${query}) Heap Used: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`);
+    console.log(`${pageId}/${data.page_count} - (${queryParam}: ${query}) Heap Used: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)} MB`);
     const books = data.results.books.content.documents;
     books.map(book => {
-      bookSchema.create({title: book.title, url: book.book_preview_url, language: book.language.name, search: query+cnt})
+      bookSchema.create({title: book.title, url: book.book_preview_url, language: "english", search: query+cnt})
         .catch(error => {
           if (error.code !== 11000) {
             console.log("Error:", error);
