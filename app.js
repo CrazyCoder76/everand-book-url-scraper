@@ -96,7 +96,7 @@ async function sendEnglishRequest(pageId, query, cnt) {
   if(Math.round(memoryUsage.heapUsed / 1024 / 1024 / 1024) >= 8) {
     console.log('Heap memory exceed!!!');
     setTimeout(() => {
-      sendRequest(pageId, query, cnt);
+      sendEnglishRequest(pageId, query, cnt);
     }, 60000);
     return;
   }
@@ -126,14 +126,14 @@ async function sendEnglishRequest(pageId, query, cnt) {
     });
 
     if(pageId < data.page_count && pageId <= 234)
-      sendRequest(pageId+1, query, cnt+1);
+      sendEnglishRequest(pageId+1, query, cnt+1);
     else {
       if(cnt + 1 < PER_WORDS)
-        sendRequest(1, query, cnt+1);
+      sendEnglishRequest(1, query, cnt+1);
     }
   }, function(err) {
     console.log(`sending request error to ${queryUrl}:${queryProxy}`);
-    setTimeout(() => { sendRequest(pageId, query, cnt); }, WAITING_TIME);
+    setTimeout(() => { sendEnglishRequest(pageId, query, cnt); }, WAITING_TIME);
   });
 }
 
