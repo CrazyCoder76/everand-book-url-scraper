@@ -23,7 +23,7 @@ const proxyTypes = [
   'http', 'socks5'
 ];
 const words = {};
-const english = [];
+let english = [];
 
 mongoose.connect('mongodb://' + HOST_NAME + '/' + DATABASE_NAME);
 
