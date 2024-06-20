@@ -1,1 +1,23 @@
 # Everand(Scridb) book urls scraper
+
+You can scrape books in below languages.
+"english"
+"german"
+"japanese"
+"hindi"
+"portuguese"
+"russian"
+"spanish"
+"french"
+"chinese"
+"arabic"
+"afrikaans"
+"turkish"
+"swedish"
+"polish"
+"indonesian"
+"italian"
+"greek"
+"danish"
+"dutch"
+"catalan"
