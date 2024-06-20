@@ -1,1 +1,1 @@
-# Get the book urls of everand.com
+# Everand(Scridb) book urls scraper
