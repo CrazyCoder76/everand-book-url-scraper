@@ -56,7 +56,7 @@ async function sendRequest(pageId, query, langId) {
   
   const queryParam = encodeURIComponent(words[language][query]);
   const queryUrl = `https://www.everand.com/search/query?query=${queryParam}&content_type=books&page=${pageId}`;
-  const queryProxy = `${proxyTypes[Math.floor(Math.random() * 2)]}://gkmyqsuy-rotate:usbx1luz1evf@p.webshare.io:80`;
+  const queryProxy = `${proxyTypes[Math.floor(Math.random() * 2)]}://********:******@******:80`;
 
   proxies ({
     url: queryUrl,
